@@ -12,7 +12,7 @@
 pip install selenium requests pymysql
 ```
 
-把 geckodriver 放到 `driver/Firefox/geckodriver.exe`。没有的话去 [geckodriver releases](https://github.com/mozilla/geckodriver/releases) 下一个，版本要和 Firefox 对上，否则启动会报 `SessionNotCreated`。驱动是二进制文件，所以没放进仓库。
+仓库里带了一份 `driver/Firefox/geckodriver.exe`。如果和你本机的 Firefox 版本对不上，去 [geckodriver releases](https://github.com/mozilla/geckodriver/releases) 下一个替换掉，版本不匹配会报 `SessionNotCreated`。`driver/Chrome/` 下那两个是早期尝试留下的，现在没用到。
 
 改一下脚本开头的数据库账号密码，然后：
 

@@ -32,10 +32,6 @@ python Software_View_Sequence.py
 
 存的时候只留 `name` / `value` / `domain` / `path` 四个字段。`sameSite` 的取值格式 Selenium 很挑，浏览器给的是 `no_restriction` 这种，回灌时会直接报错。
 
-另外脚本**不会**在结束时点「退出登录」。退出会让服务端把 token 作废，刚存下的 cookie 下次就没用了。
-
-`Cookie.json` 里是活的登录态，拿到它不需要密码就能进账号，所以不能提交到仓库。
-
 ## 数据
 
 表名 `softwares`，六个字段：软件名、图标路径、作者、下载量、更新时间、简介。

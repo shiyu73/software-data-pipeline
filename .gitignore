@@ -1,0 +1,35 @@
+# ===== 登录态与凭据（等价于账号密码，绝不提交）=====
+Cookie.json
+Cookie.json.bak
+cookies.json
+cookies.pkl
+config.py
+.env
+*.ini
+
+# 第三方 cookie 转换脚本：内含真实 auth-token，仅本地使用
+To_json.py
+
+# ===== 作业提交文档（内含旧版代码与明文凭据）=====
+2411010144朱浩翔.docx
+
+# ===== 运行时产物 =====
+img/
+analysis/
+*.log
+
+# ===== 浏览器驱动（平台相关二进制，请自行下载）=====
+driver/
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# ===== 编辑器与系统 =====
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

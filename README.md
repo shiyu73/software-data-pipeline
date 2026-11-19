@@ -9,12 +9,22 @@
 需要 Python 3.8+、本地 MySQL、Firefox。
 
 ```bash
-pip install selenium requests pymysql
+pip install -r requirements.txt
 ```
 
-仓库里带了一份 `driver/Firefox/geckodriver.exe`。如果和你本机的 Firefox 版本对不上，去 [geckodriver releases](https://github.com/mozilla/geckodriver/releases) 下一个替换掉，版本不匹配会报 `SessionNotCreated`。
+仓库不包含 `geckodriver.exe`（浏览器驱动不随代码分发）。去 [geckodriver releases](https://github.com/mozilla/geckodriver/releases) 下载与本机 Firefox 匹配的版本，放到 `driver/Firefox/geckodriver.exe`，版本不匹配会报 `SessionNotCreated`。
 
-改一下脚本开头的数据库账号密码，然后：
+数据库连接读环境变量（Windows cmd 用 `set`，PowerShell 用 `$env:`），不设置就用默认值：
+
+```bash
+set DB_HOST=localhost
+set DB_PORT=3306
+set DB_USER=root
+set DB_PASSWORD=你的密码
+set DB_NAME=softwarel
+```
+
+然后：
 
 ```bash
 python Software_View_Sequence.py
@@ -40,18 +50,19 @@ python Software_View_Sequence.py
 
 图标下载到 `img/`，数据库只存相对路径，报告直接引用本地文件。
 
+入库是增量的：`softwares` 以软件名为主键，重复采集时更新已有行，不再每次 `drop database` 重建。
+
 ## 已知问题
 
 都写在代码里：
 
-- 每次运行开头会 `drop database` 重建，不能增量更新，采到一半失败等于全丢
 - 采集循环的 `try` 包住了整个 `for`，某一条数据出错会跳过这一页剩下的所有条目，而且只打印一行日志
 - 时间分档没处理「今天」「昨天」「N周前」，这些记录被跳过，但百分比的分母还是全部条数，所以条形图加起来不到 100%
 - 某条下载量如果是空串，`float('')` 会抛异常，而这时候数据已经入库、浏览器也关了，就差报告
 - 无法无人值守，账号密码和滑块都得人来
 - 全部逻辑写在一个文件里，从上到下跑，没有函数拆分
 
-后面想做的：拆成 fetch/store/clean/report 四个模块、改成增量入库、采集逐条 try、用 Selenium Manager 自动匹配驱动。
+后面想做的：拆成 fetch/store/clean/report 四个模块、采集逐条 try、用 Selenium Manager 自动匹配驱动。
 
 ## 说明
 

@@ -35,6 +35,12 @@ from datetime import datetime
 from time import sleep,localtime,strftime
 # 初始参数
 url='https://bbsmc.net/'
+# 数据库配置：优先读环境变量，默认值兼容本地开发
+DB_HOST = os.environ.get('DB_HOST', 'localhost')
+DB_PORT = int(os.environ.get('DB_PORT', '3306'))
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', '')
+DB_NAME = os.environ.get('DB_NAME', 'softwarel')
 cookie_flag=False
 # 执行时间
 now = localtime()
@@ -43,24 +49,29 @@ print(f"Code run time:{strftime('%Y年%m月%d日 %H:%M:%S', now)}")
 #初始化
 # 连接数据库
 try:
-    connection=pymysql.connect(host='localhost',port=3306,user="root",password="")
+    connection=pymysql.connect(host=DB_HOST,port=DB_PORT,user=DB_USER,password=DB_PASSWORD)
     print("Primary:Mysql connect success")
     cursor=connection.cursor()
     print("Primary:Cursor create success")
-    cursor.execute('drop database if exists softwarel')
-    cursor.execute('create database softwarel')
-    print("Primary:Database reset success")
-    cursor.execute('use softwarel')
-    cursor.execute('create table softwares('
-                'name varchar(200),'
+    cursor.execute(f'create database if not exists `{DB_NAME}` default charset utf8mb4')
+    cursor.execute(f'use `{DB_NAME}`')
+    # 增量入库：表不存在才建，已有数据保留
+    cursor.execute('create table if not exists softwares('
+                'name varchar(200) not null,'
                 'ico_url varchar(200),'
                 'creater varchar(50),'
                 'download varchar(10),'
                 'upgrade_time varchar(50),'
-                'intorduction varchar(300)'
+                'intorduction varchar(300),'
+                'primary key(name)'
                 ')charset=utf8mb4 collate=utf8mb4_unicode_ci' )
+    # 兼容旧表：旧版本建表时没有主键，这里补一个（已有主键会报错，忽略）
+    try:
+        cursor.execute('alter table softwares add primary key(name)')
+    except pymysql.MySQLError:
+        pass
     connection.commit()
-    print("Primary:Table create success")
+    print("Primary:Table ready")
 except pymysql.OperationalError as e:
     code=e.args[0] if e.args else 0
     message=e.args[1] if e.args else str("")
@@ -230,7 +241,10 @@ while True:
                     download = i.find_elements(By.TAG_NAME, 'strong')[0].text
                     updatetime = ''.join(i.find_element(By.CSS_SELECTOR, '.stat.date.v-popper--has-tooltip').text.replace('\n', '').replace('\r', '').split())
                     describe = i.find_element(By.CLASS_NAME, 'description').text.replace('\\','/')
-                    sql = 'insert into softwares values(%s, %s, %s, %s, %s, %s)'
+                    sql = ('insert into softwares (name, ico_url, creater, download, upgrade_time, intorduction) '
+                           'values(%s, %s, %s, %s, %s, %s) '
+                           'on duplicate key update ico_url=values(ico_url), creater=values(creater), '
+                           'download=values(download), upgrade_time=values(upgrade_time), intorduction=values(intorduction)')
                     cursor.execute(sql, (safe_name, url_path, creater, download, updatetime, describe))
                     print(f"Save:{safe_name}")
                     connection.commit()
@@ -259,7 +273,7 @@ driver.quit()
 print("Web closed")
 # 可视化
 # 获取数据
-conn = pymysql.connect(host='localhost',port=3306,user='root',password='',database='softwarel')
+conn = pymysql.connect(host=DB_HOST,port=DB_PORT,user=DB_USER,password=DB_PASSWORD,database=DB_NAME)
 cursor = conn.cursor()
 cursor.execute("select name, creater, download, upgrade_time, ico_url from softwares")
 data = cursor.fetchall()

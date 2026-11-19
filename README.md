@@ -4,6 +4,8 @@
 
 完整链路是：登录 → 采集（翻页 + 滚动加载）→ 入库 → 统计 → 出报告。
 
+![分析报告预览](docs/report-preview.png)
+
 ## 怎么跑
 
 需要 Python 3.8+、本地 MySQL、Firefox。
